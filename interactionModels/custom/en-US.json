@@ -1,0 +1,51 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "space cam",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NextIntent",
+          "samples": []
+        },
+        {
+          "name": "APODIntent",
+          "slots": [],
+          "samples": [
+            "show me the pic",
+            "show me today\u0027s pic",
+            "show me the picture of the day"
+          ]
+        },
+        {
+          "name": "UpdateWidget",
+          "slots": [],
+          "samples": [
+            "update widget"
+          ]
+        }
+      ],
+      "types": []
+    }
+  },
+  "version": "4"
+}

@@ -1,0 +1,19 @@
+{
+  "name": "space-cam",
+  "version": "1.0",
+  "description": "astronomy picture of the day",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Austin Vach",
+  "license": "Apache License",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "ask-sdk": "^2.6.0",
+    "aws-sdk": "2.637.0",
+    "ask-sdk-core": "^2.7.0",
+    "ask-sdk-model": "^1.19.0",
+    "ask-sdk-dynamodb-persistence-adapter": "^2.9.0"
+  }
+}
