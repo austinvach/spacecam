@@ -7,12 +7,10 @@ const ddbAdapter = require('ask-sdk-dynamodb-persistence-adapter');
 // SKILL_ID: Find yours in the Alexa Developer Console: https://developer.amazon.com/alexa/console/ask
 // ALEXA_CLIENT_ID: Find yours at the bottom of https://developer.amazon.com/alexa/console/ask/build/permissions-v2/SKILL_ID/development/en_US - replacing SKILL_ID with your own.
 // ALEXA_CLIENT_SECRET: Find yours at the bottom of https://developer.amazon.com/alexa/console/ask/build/permissions-v2/SKILL_ID/development/en_US - replacing SKILL_ID with your own.
-// DEVICE_ID: Find your in your CloudWatch logs in the Alexa.DataStore.PackageManager.InstallRequest that is sent when you install your widget.
 
-const SkillID = "SKILL_ID";
-const AlexaClientID = "ALEXA_CLIENT_ID";
-const AlexaClientSecret = "ALEXA_CLIENT_SECRET";
-const DeviceID = "DEVICE_ID";
+const AlexaClientID = "amzn1.application-oa2-client.0431b82f3ff846268dee6377f0b0e545";
+const AlexaClientSecret = "ea6a4f23b9be50217d024d7bd8c7d33f11294441dcea3b0ad1ead069fa2cd92d";
+const SkillID = "amzn1.ask.skill.89e99eea-cac1-407a-93ff-2116e58a0546";
 const SkillStage = "development";
 
 // WIDGET SPECIFIC HANDLERS
@@ -144,7 +142,9 @@ const UpdateWidgetIntentHandler = {
         };
         response = await axios(config);
         
-        // Prepping the third API call to push data to the widget
+        // Prepping the third API call to push data to the widget.
+        // Getting the ID of the device that the user spoke to so that we can target that specific widget in our update.
+        const DeviceID = handlerInput.requestEnvelope.context.System.device.deviceId;
         config = {
             method: "post",
             url: `https://api.amazonalexa.com/v1/datastore/${SkillID}_${SkillStage}/executeCommands`,
