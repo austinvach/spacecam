@@ -8,9 +8,9 @@ const ddbAdapter = require('ask-sdk-dynamodb-persistence-adapter');
 // ALEXA_CLIENT_ID: Find yours at the bottom of https://developer.amazon.com/alexa/console/ask/build/permissions-v2/SKILL_ID/development/en_US - replacing SKILL_ID with your own.
 // ALEXA_CLIENT_SECRET: Find yours at the bottom of https://developer.amazon.com/alexa/console/ask/build/permissions-v2/SKILL_ID/development/en_US - replacing SKILL_ID with your own.
 
-const AlexaClientID = "amzn1.application-oa2-client.0431b82f3ff846268dee6377f0b0e545";
-const AlexaClientSecret = "ea6a4f23b9be50217d024d7bd8c7d33f11294441dcea3b0ad1ead069fa2cd92d";
-const SkillID = "amzn1.ask.skill.89e99eea-cac1-407a-93ff-2116e58a0546";
+const AlexaClientID = "ALEXA_CLIENT_ID";
+const AlexaClientSecret = "ALEXA_CLIENT_SECRET";
+const SkillID = "SKILL_ID";
 const SkillStage = "development";
 
 // WIDGET SPECIFIC HANDLERS
