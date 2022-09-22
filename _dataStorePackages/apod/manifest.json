@@ -1,1 +1,31 @@
-{    "packageVersion": "1.1",    "packageType": "WIDGET",    "manifest": {        "id": "apod",        "version": "1.0.0",        "type": "APL_WIDGET",        "sizes": [            "M"        ],        "publishingInformation": {            "locales": {                "en-US": {                    "M": {                        "name": "Sample name",                        "description": "Sample description",                        "keywords": [                            "Search",                            "Criteria"                        ],                        "iconUri": "https://d3ozx4qyxcxwzd.cloudfront.net/default_icon.png",                        "previews": ["https://d3ozx4qyxcxwzd.cloudfront.net/default_preview.png"]                    }                }            }        }    }}
+{
+    "packageVersion": "1.1",
+    "packageType": "WIDGET",
+    "manifest": {
+        "id": "apod",
+        "version": "1.0.0",
+        "type": "APL_WIDGET",
+        "sizes": [
+            "M"
+        ],
+        "publishingInformation": {
+            "locales": {
+                "en-US": {
+                    "M": {
+                        "name": "Astronomy Picture of the Day",
+                        "description": "A widget featuring NASA's Astronomy Picture of the Day (APOD).",
+                        "keywords": [
+                            "NASA",
+                            "APOD",
+                            "Space"
+                        ],
+                        "iconUri": "https://user-images.githubusercontent.com/7928540/191870743-4c0fd306-0fc4-4895-ba21-115c684f6089.png",
+                        "previews": [
+                            "https://d3ozx4qyxcxwzd.cloudfront.net/default_preview.png"
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
