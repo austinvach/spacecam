@@ -1,3 +1,4 @@
+// sets up dependencies
 const AWS = require("aws-sdk");
 const axios = require("axios");
 const Alexa = require("ask-sdk-core");
@@ -12,18 +13,34 @@ const AlexaClientID = "ALEXA_CLIENT_ID";
 const AlexaClientSecret = "ALEXA_CLIENT_SECRET";
 const SkillID = "SKILL_ID";
 const SkillStage = "development";
+const APODKey = "Your API Key"; // Get your API Key at https://api.nasa.gov/#signUp.
 
 // WIDGET SPECIFIC HANDLERS
 
+// Triggered when the customer installs the widget. 
 const InstallWidgetRequestHandler = {
     canHandle(handlerInput) {
         // console.log("InstallWidgetRequestHandler canHandle");
         return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.InstallRequest"
             && handlerInput.requestEnvelope.request.packageId !== null;
     },
-    handle(handlerInput) {
-        // console.log("InstallWidgetRequestHandler handle");
+    async handle(handlerInput) {
+        console.log("InstallWidgetRequestHandler handle");
+        
         const request = handlerInput.requestEnvelope.request;
+        const deviceID = handlerInput.requestEnvelope.context.System.device.deviceId;
+        const attributesManager = handlerInput.attributesManager;
+        var attributes = await attributesManager.getPersistentAttributes() || {};
+        
+        // If there are no existing devices, create a devices array and save to attributes. Else update the devices array with the device ID.
+        if(attributes.hasOwnProperty('devices') === false){
+            attributes = Object.assign({"devices":[deviceID]});
+        } else {
+            attributes.devices.push(deviceID);
+        }
+        
+        attributesManager.setPersistentAttributes(attributes);
+        await attributesManager.savePersistentAttributes();
 
         const installPackageDirective = {
             type: "Alexa.DataStore.PackageManager.InstallPackage",
@@ -52,21 +69,34 @@ const InstallWidgetRequestHandler = {
         return handlerInput.responseBuilder
             .addDirective(installPackageDirective)
             .speak(speakOutput)
+            .withShouldEndSession(true)
             .getResponse();
     },
 };
 
+// Triggered when the widget is removed/uninstalled.
 const RemoveWidgetRequestHandler = {
     canHandle(handlerInput) {
         // console.log("RemoveWidgetRequestHandler canHandle");
         return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.PackageRemoved"
             && handlerInput.requestEnvelope.request.packageId !== null;
     },
-    handle(handlerInput) {
-        // console.log("RemoveWidgetRequestHandler handle");
+    async handle(handlerInput) {
+        console.log("RemoveWidgetRequestHandler handle");
+        
         const request = handlerInput.requestEnvelope.request;
+        const deviceID = handlerInput.requestEnvelope.context.System.device.deviceId;
+        const attributesManager = handlerInput.attributesManager;
+        var attributes = await attributesManager.getPersistentAttributes() || {};
+        
+        // Remove the device from the array if the widget has been removed.
+        attributes.devices = attributes.devices.filter(item => item !== deviceID); 
+        attributesManager.setPersistentAttributes(attributes);
+        await attributesManager.savePersistentAttributes();
+
         const speakOutput = `The ${request.packageId} widget has been removed.`;
 
+        // Update and remove the device ID from userID attribute
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .getResponse();
@@ -96,61 +126,22 @@ const UpdateWidgetIntentHandler = {
             && Alexa.getIntentName(handlerInput.requestEnvelope) === "UpdateWidget";
     },
     async handle(handlerInput) {
-        // console.log("UpdateWidgetIntentHandler handle");
-    
-        // Prepping the first API call to get NASA's astromony picture of the day (APOD).
-        // APOD Docs - https://github.com/nasa/apod-api
-        // Axios Docs - https://axios-http.com/docs/api_intro
-        var config = {
-            method: "get",
-            timeout: 1000,
-            url: "https://api.nasa.gov/planetary/apod",
-            params: {
-                api_key: "DEMO_KEY" //You can get your own API key at https://api.nasa.gov/#signUp.
-            }
-        };
-        // Calling the NASA API
-        var response = await axios(config);
-        
-        // Saving results for later use
-        // Data Persistence Docs - https://developer.amazon.com/en-US/docs/alexa/hosted-skills/alexa-hosted-skills-session-persistence.html
-        const attributesManager = handlerInput.attributesManager;
-        let attributes = {
-            "apodURL":response.data.url,
-            "apodDate":response.data.date,
-            "apodTitle":response.data.title,
-            "apodExplanation":response.data.explanation
-        };
-        attributesManager.setPersistentAttributes(attributes);
-        await attributesManager.savePersistentAttributes();
+        console.log("UpdateWidgetIntentHandler handle");
+        const userID = handlerInput.requestEnvelope.context.System.user.userId;
 
-        // Prepping the second API call to fetch access token.
-        config = {
-            method: "post",
-            url: "https://api.amazon.com/auth/o2/token",
-            timeout: 1000,
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                "charset": "utf-8",
-            },
-            params: {
-                grant_type: "client_credentials",
-                client_id: AlexaClientID,
-                client_secret: AlexaClientSecret,
-                scope: "alexa::datastore"
-            }
-        };
-        response = await axios(config);
+        var speakOutput = '';
+        
+        // Prepping the first API call to get NASA's astromony picture of the day (APOD).
+        let apiResponse = await getLatestPicture();
+        let tokenResponse = await getAccessToken();
         
         // Prepping the third API call to push data to the widget.
-        // Getting the ID of the device that the user spoke to so that we can target that specific widget in our update.
-        const DeviceID = handlerInput.requestEnvelope.context.System.device.deviceId;
-        config = {
+        let config = {
             method: "post",
             url: `https://api.amazonalexa.com/v1/datastore/${SkillID}_${SkillStage}/executeCommands`,
             headers: { 
                 "Content-Type": "application/json",
-                "Authorization": `${response.data.token_type} ${response.data.access_token}`
+                "Authorization": `${tokenResponse.data.token_type} ${tokenResponse.data.access_token}`
             },
             data : {
                 "commands": [
@@ -159,23 +150,43 @@ const UpdateWidgetIntentHandler = {
                         "namespace": "myNamespace",
                         "key": "myKey",
                         "content": {
-                            "imageSource": attributes.apodURL
+                            "imageSource": apiResponse.data.url
                         }
                     }
                 ],
                 "targets": [
                     {
-                        "type": "DEVICE_ID",
-                        "targetId": DeviceID
+                        "type": "USER_ID",
+                        "targetId": userID
                     }
                 ]
             }
         };
         
-        response = await axios(config);
-
-        const speakOutput = response.data.dispatchResults[0].code;
-
+        let response = await axios(config);
+        
+        switch (response.data.dispatchResults[0].code) {
+            case 'SUCCESS':
+                speakOutput = 'The widget was successfully updated.';
+                break;
+            
+            case 'INVALID_TARGET':
+                speakOutput = 'The target was invalid.';
+                break;
+            
+            case 'TARGET_UNAVAILABLE':
+                speakOutput = 'The device is offline and hence an update was not pushed.';
+                break;
+            
+            case 'INTERNAL_ERROR':
+                speakOutput = 'The dispatch failed because of an unknown error.';
+                break;
+        
+            default:
+                speakOutput = 'The widget was successfully updated.';
+                break;
+        }
+        
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .withShouldEndSession(true)
@@ -193,18 +204,10 @@ const LaunchRequestHandler = {
     async handle(handlerInput) {
         // console.log("LaunchRequestHandler handle");
         
-        const attributesManager = handlerInput.attributesManager;
-        const attributes = await attributesManager.getPersistentAttributes() || {};
-        console.log(`=== LOADING PERSISTENT ATTRIBUTES: ${attributes}`);
-        
         var speakOutput = "";
-        
-        if(attributes.hasOwnProperty('apodDate') && attributes.hasOwnProperty('apodTitle')) {
-            speakOutput = `The picture for ${attributes.apodDate} is called ${attributes.apodTitle}. Tap the screen to learn more about this photo.`;
-        } else {
-            speakOutput = "This is a placholder image. To see NASA's picture of the day, ask to update the widget.";
-        }
-        
+
+        var response = await getLatestPicture();
+        speakOutput = `The picture for ${response.data.date} is called ${response.data.title}. Tap the screen to learn more about this picture.`
 
         // Check if the user's device supports APL. If yes, send an APL response.
         if (Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)["Alexa.Presentation.APL"]) {
@@ -218,10 +221,10 @@ const LaunchRequestHandler = {
                     },
                     datasources: {
                         apod: {
-                            img: attributes.hasOwnProperty('apodURL') ? attributes.apodURL : "https://images.pexels.com/photos/4644812/pexels-photo-4644812.jpeg",
-                            title: attributes.hasOwnProperty('apodTitle') ? attributes.apodTitle : "Placeholder Image",
+                            img: response.data.url,
+                            title: response.data.title,
                             properties: {
-                                exp: attributes.hasOwnProperty('apodExplanation') ? attributes.apodExplanation : speakOutput,
+                                exp: response.data.explanation
                             },
                             transformers: [
                                 {
@@ -342,6 +345,42 @@ const ErrorHandler = {
             .getResponse();
     }
 };
+
+// API call to get the latest picture from NASA APOD. 
+// APOD Docs - https://github.com/nasa/apod-api
+// Axios Docs - https://axios-http.com/docs/api_intro
+function getLatestPicture(){
+     var config = {
+            method: "get",
+            timeout: 1000,
+            url: "https://api.nasa.gov/planetary/apod",
+            params: {
+                api_key: APODKey
+            }
+    };
+    
+    return axios(config);
+}
+
+// Gets Access Token with the scope alexa::datastore. Used later to push to datastore.
+function getAccessToken(){
+    let OAuthConfig = {
+            method: "post",
+            url: "https://api.amazon.com/auth/o2/token",
+            timeout: 1000,
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "charset": "utf-8",
+            },
+            params: {
+                grant_type: "client_credentials",
+                client_id: AlexaClientID,
+                client_secret: AlexaClientSecret,
+                scope: "alexa::datastore"
+            }
+        };
+    return axios(OAuthConfig);
+}
 
 // REQUEST INTERCEPTORS
 
