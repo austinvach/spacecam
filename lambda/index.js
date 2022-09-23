@@ -13,7 +13,7 @@ const AlexaClientID = "ALEXA_CLIENT_ID";
 const AlexaClientSecret = "ALEXA_CLIENT_SECRET";
 const SkillID = "SKILL_ID";
 const SkillStage = "development";
-const APODKey = "Your API Key"; // Get your API Key at https://api.nasa.gov/#signUp.
+const APODKey = "DEMO_KEY"; // Get your API Key at https://api.nasa.gov/#signUp.
 
 // WIDGET SPECIFIC HANDLERS
 
