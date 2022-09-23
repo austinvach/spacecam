@@ -12,16 +12,16 @@
             "locales": {
                 "en-US": {
                     "M": {
-                        "name": "Astronomy Picture of the Day",
+                        "name": "SPACE CAM",
                         "description": "A widget featuring NASA's Astronomy Picture of the Day (APOD).",
                         "keywords": [
                             "NASA",
                             "APOD",
                             "Space"
                         ],
-                        "iconUri": "https://user-images.githubusercontent.com/7928540/191870743-4c0fd306-0fc4-4895-ba21-115c684f6089.png",
+                        "iconUri": "https://user-images.githubusercontent.com/7928540/191887657-1c36a701-bb4c-481f-9b74-8da2fb83ca3b.png",
                         "previews": [
-                            "https://d3ozx4qyxcxwzd.cloudfront.net/default_preview.png"
+                            "https://user-images.githubusercontent.com/7928540/191887545-bc69e439-022f-45dd-ab02-3ec4d8e66394.png"
                         ]
                     }
                 }
