@@ -20,7 +20,6 @@ const APODKey = "DEMO_KEY"; // Get your API Key at https://api.nasa.gov/#signUp.
 // Triggered when the customer installs the widget. 
 const InstallWidgetRequestHandler = {
     canHandle(handlerInput) {
-        // console.log("InstallWidgetRequestHandler canHandle");
         return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.InstallRequest"
             && handlerInput.requestEnvelope.request.packageId !== null;
     },
@@ -32,15 +31,12 @@ const InstallWidgetRequestHandler = {
         const attributesManager = handlerInput.attributesManager;
         var attributes = await attributesManager.getPersistentAttributes() || {};
         
-        // If there are no existing devices, create a devices array and save to attributes. Else update the devices array with the device ID.
-        if(attributes.hasOwnProperty('devices') === false){
-            attributes = Object.assign({"devices":[deviceID]});
-        } else {
-            attributes.devices.push(deviceID);
+        if (!Array.isArray(attributes.devices) || !attributes.devices.includes(deviceID)) {
+            attributes.devices = [ ...(attributes.devices || []), deviceID];
+            attributesManager.setPersistentAttributes(attributes);
+            await attributesManager.savePersistentAttributes()
         }
         
-        attributesManager.setPersistentAttributes(attributes);
-        await attributesManager.savePersistentAttributes();
 
         const installPackageDirective = {
             type: "Alexa.DataStore.PackageManager.InstallPackage",
@@ -90,9 +86,11 @@ const RemoveWidgetRequestHandler = {
         var attributes = await attributesManager.getPersistentAttributes() || {};
         
         // Remove the device from the array if the widget has been removed.
-        attributes.devices = attributes.devices.filter(item => item !== deviceID); 
-        attributesManager.setPersistentAttributes(attributes);
-        await attributesManager.savePersistentAttributes();
+        if(Array.isArray(attributes.devices) || attributes.devices.includes(deviceID)){
+            attributes.devices = attributes.devices.filter(item => item !== deviceID); 
+            attributesManager.setPersistentAttributes(attributes);
+            await attributesManager.savePersistentAttributes();
+        }
 
         const speakOutput = `The ${request.packageId} widget has been removed.`;
 
@@ -131,17 +129,14 @@ const UpdateWidgetIntentHandler = {
 
         var speakOutput = '';
         
-        // Prepping the first API call to get NASA's astromony picture of the day (APOD).
-        let apiResponse = await getLatestPicture();
-        let tokenResponse = await getAccessToken();
-        
-        // Prepping the third API call to push data to the widget.
+        const [ apiResponse, tokenResponse ] = await Promise.all([ getLatestPicture(), getAccessToken() ]);
+
         let config = {
             method: "post",
             url: `https://api.amazonalexa.com/v1/datastore/${SkillID}_${SkillStage}/executeCommands`,
             headers: { 
                 "Content-Type": "application/json",
-                "Authorization": `${tokenResponse.data.token_type} ${tokenResponse.data.access_token}`
+                "Authorization": `${tokenResponse.token_type} ${tokenResponse.access_token}`
             },
             data : {
                 "commands": [
@@ -150,7 +145,7 @@ const UpdateWidgetIntentHandler = {
                         "namespace": "myNamespace",
                         "key": "myKey",
                         "content": {
-                            "imageSource": apiResponse.data.url
+                            "imageSource": apiResponse.url
                         }
                     }
                 ],
@@ -207,8 +202,7 @@ const LaunchRequestHandler = {
         var speakOutput = "";
 
         var response = await getLatestPicture();
-        speakOutput = `The picture for ${response.data.date} is called ${response.data.title}. Tap the screen to learn more about this picture.`
-
+        speakOutput = `The picture for ${response.date} is called ${response.title}. Tap the screen to learn more about this picture.`
         // Check if the user's device supports APL. If yes, send an APL response.
         if (Alexa.getSupportedInterfaces(handlerInput.requestEnvelope)["Alexa.Presentation.APL"]) {
             // Add the RenderDocument directive to the response
@@ -221,10 +215,10 @@ const LaunchRequestHandler = {
                     },
                     datasources: {
                         apod: {
-                            img: response.data.url,
-                            title: response.data.title,
+                            img: response.url,
+                            title: response.title,
                             properties: {
-                                exp: response.data.explanation
+                                exp: response.explanation
                             },
                             transformers: [
                                 {
@@ -346,20 +340,27 @@ const ErrorHandler = {
     }
 };
 
-// API call to get the latest picture from NASA APOD. 
+// API call to get the latest picture from NASA APOD. Get your API Key at https://api.nasa.gov/#signUp.
 // APOD Docs - https://github.com/nasa/apod-api
 // Axios Docs - https://axios-http.com/docs/api_intro
 function getLatestPicture(){
      var config = {
             method: "get",
-            timeout: 1000,
+            timeout: 3000,
             url: "https://api.nasa.gov/planetary/apod",
             params: {
                 api_key: APODKey
             }
     };
     
-    return axios(config);
+    return axios(config)
+    .then(function (response){
+      console.log(JSON.stringify(response.data));
+      return response.data;
+    })
+    .catch(function (error){
+      console.log(error)
+    });
 }
 
 // Gets Access Token with the scope alexa::datastore. Used later to push to datastore.
@@ -367,7 +368,7 @@ function getAccessToken(){
     let OAuthConfig = {
             method: "post",
             url: "https://api.amazon.com/auth/o2/token",
-            timeout: 1000,
+            timeout: 3000,
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
                 "charset": "utf-8",
@@ -379,7 +380,14 @@ function getAccessToken(){
                 scope: "alexa::datastore"
             }
         };
-    return axios(OAuthConfig);
+    return axios(OAuthConfig)
+    .then(function (response){
+      console.log(JSON.stringify(response.data));
+      return response.data;
+    })
+    .catch(function (error){
+      console.log(error)
+    });
 }
 
 // REQUEST INTERCEPTORS
