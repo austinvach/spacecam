@@ -1,17 +1,70 @@
 {
-    "packageVersion": "1.1",
+    "packageVersion": "1.2",
     "packageType": "WIDGET",
     "manifest": {
         "id": "apod",
         "version": "1.0.0",
         "type": "APL_WIDGET",
-        "sizes": [
-            "M"
+        "targetViewports": [
+            {
+                "maxHeight": 711,
+                "maxWidth": 425,
+                "minHeight": 222,
+                "minWidth": 134,
+                "shape": "RECTANGLE",
+                "name": "WIDGET_M"
+            }
+        ],
+        "locations": [
+            "HOME",
+            "FAVORITE"
+        ],
+        "supportedDeviceViewports": [
+            {
+                "maxHeight": 599,
+                "maxWidth": 1279,
+                "minHeight": 100,
+                "minWidth": 960,
+                "mode": "HUB",
+                "shape": "RECTANGLE"
+            },
+            {
+                "maxHeight": 959,
+                "maxWidth": 1279,
+                "minHeight": 600,
+                "minWidth": 960,
+                "mode": "HUB",
+                "shape": "RECTANGLE"
+            },
+            {
+                "maxHeight": 1279,
+                "maxWidth": 1920,
+                "minHeight": 600,
+                "minWidth": 1280,
+                "mode": "HUB",
+                "shape": "RECTANGLE"
+            },
+            {
+                "maxHeight": 1279,
+                "maxWidth": 2560,
+                "minHeight": 960,
+                "minWidth": 1920,
+                "mode": "HUB",
+                "shape": "RECTANGLE"
+            },
+            {
+                "maxHeight": 2560,
+                "maxWidth": 1279,
+                "minHeight": 1920,
+                "minWidth": 960,
+                "mode": "HUB",
+                "shape": "RECTANGLE"
+            }
         ],
         "publishingInformation": {
             "locales": {
                 "en-US": {
-                    "M": {
+                    "WIDGET_M": {
                         "name": "SPACE CAM",
                         "description": "A widget featuring NASA's Astronomy Picture of the Day (APOD).",
                         "keywords": [
