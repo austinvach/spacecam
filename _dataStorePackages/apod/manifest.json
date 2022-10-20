@@ -11,6 +11,7 @@
                 "maxWidth": 425,
                 "minHeight": 222,
                 "minWidth": 134,
+                "mode": "WIDGET",
                 "shape": "RECTANGLE",
                 "name": "WIDGET_M"
             }
