@@ -41,7 +41,7 @@ const InstallWidgetRequestHandler = {
         const installPackageDirective = {
             type: "Alexa.DataStore.PackageManager.InstallPackage",
             dataStorePackage: {
-                packageVersion: "1.1",
+                packageVersion: "1.2",
                 packageType: "WIDGET",
                 manifest: {
                     type: "Link",
