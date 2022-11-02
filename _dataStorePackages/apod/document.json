@@ -1,1 +1,70 @@
-{"type":"APL","version":"2022.1","theme":"light","extensions":[{"name":"DataStore","uri":"alexaext:datastore:10"}],"settings":{"DataStore":{"dataBindings":[{"namespace":"myNamespace","key":"myKey","dataBindingName":"myDSData","dataType":"object"}]}},"import":[{"name":"alexa-layouts","version":"1.6.0"}],"mainTemplate":{"parameters":["myData"],"items":{"type":"Container","width":"100%","height":"100%","item":[{"type":"Container","width":"100%","height":"100%","items":[{"type":"AlexaPhoto","id":"myAlexaPhoto","headerTitle":"${myDSData.headerTitle ? myDSData.headerTitle : myData.headerTitle}","primaryText":"${myDSData.primaryText ? myDSData.primaryText : myData.primaryText}","secondaryText":"${myDSData.secondaryText ? myDSData.secondaryText : myData.secondaryText}","imageSource":"${myDSData.imageSource ? myDSData.imageSource : myData.imageSource}"}]},{"type":"AlexaPressState","id":"myAlexaPressState","hasFooterButton":false,"hasHeader":false,"primaryAction":[{"type":"SendEvent","flags":{"InteractionModality":"Standard"}}]}]}}}
+{
+    "type": "APL",
+    "version": "2022.1",
+    "theme": "light",
+    "extensions": [
+        {
+            "name": "DataStore",
+            "uri": "alexaext:datastore:10"
+        }
+    ],
+    "settings": {
+        "DataStore": {
+            "dataBindings": [
+                {
+                    "namespace": "myNamespace",
+                    "key": "myKey",
+                    "dataBindingName": "myDSData",
+                    "dataType": "object"
+                }
+            ]
+        }
+    },
+    "import": [
+        {
+            "name": "alexa-layouts",
+            "version": "1.6.0"
+        }
+    ],
+    "mainTemplate": {
+        "parameters": [
+            "myData"
+        ],
+        "items": {
+            "type": "Container",
+            "width": "100%",
+            "height": "100%",
+            "item": [
+                {
+                    "type": "Container",
+                    "width": "100%",
+                    "height": "100%",
+                    "items": [
+                        {
+                            "type": "AlexaPhoto",
+                            "id": "myAlexaPhoto",
+                            "headerTitle": "${myDSData.headerTitle ? myDSData.headerTitle : myData.headerTitle}",
+                            "primaryText": "${myDSData.primaryText ? myDSData.primaryText : myData.primaryText}",
+                            "secondaryText": "${myDSData.secondaryText ? myDSData.secondaryText : myData.secondaryText}",
+                            "imageSource": "${myDSData.imageSource ? myDSData.imageSource : myData.imageSource}"
+                        }
+                    ]
+                },
+                {
+                    "type": "AlexaPressState",
+                    "id": "myAlexaPressState",
+                    "hasFooterButton": false,
+                    "hasHeader": false,
+                    "primaryAction": [
+                        {
+                            "type": "SendEvent",
+                            "flags": {
+                                "interactionMode": "STANDARD"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
