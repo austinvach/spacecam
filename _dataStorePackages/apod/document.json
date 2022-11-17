@@ -1,7 +1,6 @@
 {
     "type": "APL",
-    "version": "2022.1",
-    "theme": "light",
+    "version": "2022.2",
     "extensions": [
         {
             "name": "DataStore",
