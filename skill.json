@@ -122,9 +122,6 @@
             "packages": [
               {
                 "id": "apod"
-              },
-              {
-                "id": "blank"
               }
             ],
             "type": "ALEXA_DATASTORE_PACKAGEMANAGER"
