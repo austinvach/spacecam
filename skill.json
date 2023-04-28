@@ -127,11 +127,6 @@
             "type": "ALEXA_DATASTORE_PACKAGEMANAGER"
           },
           {
-            "requestedModules": [
-              {
-                "uri": "dsmodule://datarefresh"
-              }
-            ],
             "type": "ALEXA_DATA_STORE"
           },
           {
