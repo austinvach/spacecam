@@ -112,7 +112,7 @@ const UpdateWidgetIntentHandler = {
             data : {
                 "commands": [
                     {
-                        "type": "PutObject",
+                        "type": "PUT_OBJECT",
                         "namespace": "myNamespace",
                         "key": "myKey",
                         "content": {
@@ -131,7 +131,7 @@ const UpdateWidgetIntentHandler = {
         
         let response = await axios(config);
         
-        switch (response.data.result[0].type) {
+        switch (response.data.results[0].type) {
             case 'SUCCESS':
                 speakOutput = 'The target device received the payload.';
                 break;
