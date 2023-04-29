@@ -40,4 +40,4 @@ This sample helps you get up and running and will show you how all the pieces wo
 
 ## Congratulations!
 
-As a next step, familiarize yourself with the backend code (visible from the “Code” section of the Developer Console). It demonstrates how to handle the most common events in a widget’s lifecycle.
+As a next step, familiarize yourself with the backend code (visible from the “Code” section of the Developer Console) to learn how to handle the most common events in a widget’s lifecycle and reference [Amazon's technical documentation](https://developer.amazon.com/en-US/docs/alexa/alexa-presentation-language/about-widgets-and-apl.html) for more information.
