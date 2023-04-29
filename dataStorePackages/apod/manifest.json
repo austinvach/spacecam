@@ -5,6 +5,7 @@
         "schemaVersion": "1.0",
         "locales": {
             "en-US": [{
+                "targetViewport": "WIDGET_M",
                 "metadata": {
                     "name": "SPACE CAM",
                     "description": "A widget featuring NASA's Astronomy Picture of the Day (APOD).",
