@@ -17,7 +17,7 @@ This sample helps you get up and running and will show you how all the pieces wo
 ## Update Alexa Client Secret and ID
 
 1. Select "Tools" > "Permissions" from the left-hand menu, scroll down to the bottom of the page, and copy the "Alexa Client Id" and "Alexa Client Secret" to a temporary location.
-2. Go to the "Code" tab, and replace [ALEXA_CLIENT_ID](/lambda/index.js#L12), [ALEXA_CLIENT_SECRET](/lambda/index.js#L13), and [SKILL_ID](/lambda/index.js#L14) with your own values on lines 11-12 in [index.js](/lambda/index.js#L11-L12).
+2. Go to the "Code" tab, and replace [ALEXA_CLIENT_ID](/lambda/index.js#L12) and [ALEXA_CLIENT_SECRET](/lambda/index.js#L13) with your own values on lines 11-12 in [index.js](/lambda/index.js#L11-L12).
 3. Once all the variables have been updated, click “Deploy” to save and deploy the changes.
 
 ## Enable Skill Testing
