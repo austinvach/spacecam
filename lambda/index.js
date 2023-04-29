@@ -5,14 +5,11 @@ const Alexa = require("ask-sdk-core");
 const ddbAdapter = require('ask-sdk-dynamodb-persistence-adapter');
 
 // REPLACE THE PLACEHOLDERS WITH YOUR OWN INFO:
-// SKILL_ID: Find yours in the Alexa Developer Console: https://developer.amazon.com/alexa/console/ask
 // ALEXA_CLIENT_ID: Find yours at the bottom of https://developer.amazon.com/alexa/console/ask/build/permissions-v2/SKILL_ID/development/en_US - replacing SKILL_ID with your own.
 // ALEXA_CLIENT_SECRET: Find yours at the bottom of https://developer.amazon.com/alexa/console/ask/build/permissions-v2/SKILL_ID/development/en_US - replacing SKILL_ID with your own.
 
 const AlexaClientID = "ALEXA_CLIENT_ID";
 const AlexaClientSecret = "ALEXA_CLIENT_SECRET";
-const SkillID = "SKILL_ID";
-const SkillStage = "development";
 const APODKey = "DEMO_KEY"; // Get your API Key at https://api.nasa.gov/#signUp.
 
 // WIDGET SPECIFIC HANDLERS
@@ -20,7 +17,7 @@ const APODKey = "DEMO_KEY"; // Get your API Key at https://api.nasa.gov/#signUp.
 // Triggered when the customer installs the widget. 
 const InstallWidgetRequestHandler = {
     canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.InstallRequest"
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.UsagesInstalled"
             && handlerInput.requestEnvelope.request.packageId !== null;
     },
     async handle(handlerInput) {
@@ -37,34 +34,9 @@ const InstallWidgetRequestHandler = {
             await attributesManager.savePersistentAttributes()
         }
         
+        console.log("Installed to Device " + deviceID);
 
-        const installPackageDirective = {
-            type: "Alexa.DataStore.PackageManager.InstallPackage",
-            dataStorePackage: {
-                packageVersion: "1.2",
-                packageType: "WIDGET",
-                manifest: {
-                    type: "Link",
-                    src: `package://alexa/datastore/packages/${request.packageId}/manifest.json`,
-                },
-                content: {
-                    document: {
-                        type: "Link",
-                        src: `package://alexa/datastore/packages/${request.packageId}/document.json`,
-                    },
-                    datasources: {
-                        type: "Link",
-                        src: `package://alexa/datastore/packages/${request.packageId}/datasources/default.json`,
-                    }
-                }
-            }
-        };
-        
-        const speakOutput = `Installing the ${request.packageId} widget`;
-        
         return handlerInput.responseBuilder
-            .addDirective(installPackageDirective)
-            .speak(speakOutput)
             .withShouldEndSession(true)
             .getResponse();
     },
@@ -74,7 +46,7 @@ const InstallWidgetRequestHandler = {
 const RemoveWidgetRequestHandler = {
     canHandle(handlerInput) {
         // console.log("RemoveWidgetRequestHandler canHandle");
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.PackageRemoved"
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === "Alexa.DataStore.PackageManager.UpdateRequest"
             && handlerInput.requestEnvelope.request.packageId !== null;
     },
     async handle(handlerInput) {
@@ -92,11 +64,10 @@ const RemoveWidgetRequestHandler = {
             await attributesManager.savePersistentAttributes();
         }
 
-        const speakOutput = `The ${request.packageId} widget has been removed.`;
+        console.log("Removed from Device " + deviceID);
 
         // Update and remove the device ID from userID attribute
         return handlerInput.responseBuilder
-            .speak(speakOutput)
             .getResponse();
     },
 };
@@ -125,7 +96,7 @@ const UpdateWidgetIntentHandler = {
     },
     async handle(handlerInput) {
         console.log("UpdateWidgetIntentHandler handle");
-        const userID = handlerInput.requestEnvelope.context.System.user.userId;
+        const deviceID = handlerInput.requestEnvelope.context.System.device.deviceId;
 
         var speakOutput = '';
         
@@ -133,7 +104,7 @@ const UpdateWidgetIntentHandler = {
 
         let config = {
             method: "post",
-            url: `https://api.amazonalexa.com/v1/datastore/${SkillID}_${SkillStage}/executeCommands`,
+            url: `https://api.amazonalexa.com/v1/datastore/commands`,
             headers: { 
                 "Content-Type": "application/json",
                 "Authorization": `${tokenResponse.token_type} ${tokenResponse.access_token}`
@@ -149,37 +120,45 @@ const UpdateWidgetIntentHandler = {
                         }
                     }
                 ],
-                "targets": [
-                    {
-                        "type": "USER_ID",
-                        "targetId": userID
-                    }
-                ]
+                "target": {
+                    "type": "DEVICES",
+                    "items": [
+                        deviceID
+                    ]
+                }
             }
         };
         
         let response = await axios(config);
         
-        switch (response.data.dispatchResults[0].code) {
+        switch (response.data.result[0].type) {
             case 'SUCCESS':
-                speakOutput = 'The widget was successfully updated.';
+                speakOutput = 'The target device received the payload.';
                 break;
             
-            case 'INVALID_TARGET':
-                speakOutput = 'The target was invalid.';
+            case 'INVALID_DEVICE':
+                speakOutput = 'The target device isn\'t capable of processing the payload. For example, the target device doesn\'t support the data store.';
                 break;
             
-            case 'TARGET_UNAVAILABLE':
-                speakOutput = 'The device is offline and hence an update was not pushed.';
+            case 'DEVICE_UNAVAILABLE':
+                speakOutput = 'The dispatch failed because the device is offline. When the commands operation sets the attemptDeliveryUntil property, Alexa attempts to redeliver the commands when the device is back online. You can use the query operation to get the status of this attempted delivery.';
                 break;
             
+            case 'DEVICE_PERMANENTLY_UNAVAILABLE':
+                speakOutput = 'The dispatch failed because the device is no longer available. For example, this error occurs when the target device is no longer registered.';
+                break;
+
+            case 'CONCURRENCY_ERROR':
+                speakOutput = 'There were multiple, concurrent attempts to update the same data store region. You can use the query operation to get the status of the attempted delivery before you attempt to send a new commands request.';
+                break;
+
             case 'INTERNAL_ERROR':
                 speakOutput = 'The dispatch failed because of an unknown error.';
                 break;
-        
-            default:
-                speakOutput = 'The widget was successfully updated.';
-                break;
+
+            case 'PENDING_REQUEST_COUNT_EXCEEDS_LIMIT':
+                speakOutput = 'The count of pending requests exceeds the limit.';
+                break;    
         }
         
         return handlerInput.responseBuilder
