@@ -30,7 +30,7 @@ This sample helps you get up and running and will show you how all the pieces wo
 2. Click “Edit” to open the “apod” widget it in the authoring tool.
     - Note: "apod” uses the [widget responsive templates](https://developer.amazon.com/en-US/docs/alexa/alexa-presentation-language/responsive-templates.html) which are designed to be responsive across different screen sizes/viewports.
 
-## Push to Device
+## Send to Device
 
 1. Assuming you have an Echo Show 8, 10, or 15, select any of those devices from the drop down list at the bottom of the screen, switch from “Preview” to “Install”, and click “Send to Device” to install the widget on that device.
     - Note: You will see a placeholder appear in the [Favorite Widgets Panel](https://us.amazon.com/gp/help/customer/display.html?nodeId=GGVNRBH8CKP9PRC2) on the device you sent your widget to and within a few seconds the “apod” widget should appear in that location.
